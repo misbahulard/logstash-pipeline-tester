@@ -1,0 +1,15 @@
+config:
+  address: 127.0.0.1
+  port: 8080
+  log:
+    debug: true
+    file:
+      enable: false
+      path: ./default.log
+      max_size: 100
+      max_backup: 5
+      max_age: 30
+      compress: false
+  logstash:
+    bin_path: /usr/share/logstash/bin/logstash
+    pipeline_dir: /tmp/logstash-pipeline-tester
