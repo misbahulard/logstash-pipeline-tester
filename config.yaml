@@ -1,5 +1,5 @@
 config:
-  address: 127.0.0.1
+  address: 0.0.0.0
   port: 8080
   log:
     debug: true
@@ -10,6 +10,9 @@ config:
       max_backup: 5
       max_age: 30
       compress: false
+  cleanup:
+    enable: true
+    interval: 15m
   logstash:
     bin_path: /usr/share/logstash/bin/logstash
     pipeline_dir: /tmp/logstash-pipeline-tester

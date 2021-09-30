@@ -14,7 +14,12 @@ func InitLogger() *zap.Logger {
 	encoder := zapcore.NewJSONEncoder(encoderConfig)
 	writer := getLogWriter()
 
-	core := zapcore.NewCore(encoder, writer, zapcore.DebugLevel)
+	level := zapcore.InfoLevel
+	if viper.GetBool("config.log.debug") {
+		level = zapcore.DebugLevel
+	}
+
+	core := zapcore.NewCore(encoder, writer, level)
 	logger := zap.New(core, zap.AddCaller())
 	return logger
 }

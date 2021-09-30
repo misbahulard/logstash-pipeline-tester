@@ -21,17 +21,23 @@ type PipelineRequest struct {
 }
 
 func ExecutePipeline(pr PipelineRequest, logger *zap.Logger) (string, error) {
+	logger.Debug("create temporary dir",
+		zap.String("uuid", pr.UUID))
 	err := createDir(pr.UUID)
 	if err != nil {
 		return "", err
 	}
 
+	logger.Debug("initialize logstash config",
+		zap.String("uuid", pr.UUID))
 	err = initializeLogstashConfig(pr.UUID)
 	if err != nil {
 		return "", err
 	}
 
 	// append input output for logstash pipeline
+	logger.Debug("adding input and output logstash pipeline config",
+		zap.String("uuid", pr.UUID))
 	pipelineString, err := appendInputOutput(pr.PipelineInput, pr.UUID)
 	if err != nil {
 		return "", err
@@ -39,6 +45,10 @@ func ExecutePipeline(pr PipelineRequest, logger *zap.Logger) (string, error) {
 
 	// write to pipeline file
 	pipelinePath := viper.GetString("config.logstash.pipeline_dir") + "/" + pr.UUID + "/pipeline.conf"
+	logger.Debug("write pipeline config file",
+		zap.String("uuid", pr.UUID),
+		zap.String("file", pipelinePath))
+
 	err = writeToFile(pipelineString, pipelinePath)
 	if err != nil {
 		return "", err
@@ -46,13 +56,21 @@ func ExecutePipeline(pr PipelineRequest, logger *zap.Logger) (string, error) {
 
 	// write to log file
 	logPath := viper.GetString("config.logstash.pipeline_dir") + "/" + pr.UUID + "/sample.log"
+	logger.Debug("write log file",
+		zap.String("uuid", pr.UUID),
+		zap.String("file", logPath))
+
 	err = writeToFile(pr.LogInput, logPath)
 	if err != nil {
 		return "", err
 	}
 
 	settingsPath := viper.GetString("config.logstash.pipeline_dir") + "/" + pr.UUID
+	logger.Debug("logstash setting pipeline path",
+		zap.String("uuid", pr.UUID),
+		zap.String("file", settingsPath))
 
+	logger.Debug("start executing logstash pipeline")
 	output, err := execute(pipelinePath, settingsPath, logger)
 	if err != nil {
 		return "", err
@@ -123,7 +141,7 @@ path.logs: {{ .LogstashLog }}`
 }
 
 func execute(pipelinePath string, settingsPath string, logger *zap.Logger) (string, error) {
-	logger.Info("execute command",
+	logger.Debug("execute command",
 		zap.String("cmd", fmt.Sprint(viper.GetString("config.logstash.bin_path"), "-f", pipelinePath, "--path.settings", settingsPath)))
 
 	cmd := exec.Command(viper.GetString("config.logstash.bin_path"), "-f", pipelinePath, "--path.settings", settingsPath)
@@ -178,49 +196,6 @@ func writeToFile(input string, path string) error {
 
 	for _, line := range lines {
 		dw.WriteString(line + "\n")
-	}
-
-	dw.Flush()
-	file.Close()
-
-	return nil
-}
-
-func readPipeline(pipeline string, uuid string) error {
-	fmt.Println("read pipeline")
-
-	fileName := viper.GetString("config.logstash.pipeline_dir") + "/" + uuid + "/" + "pipeline.conf"
-
-	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		return err
-	}
-
-	dw := bufio.NewWriter(file)
-
-	lines := strings.Split(pipeline, "\n")
-	startPrint := false
-
-	for i, line := range lines {
-		if equal := strings.Index(line, "input {"); equal >= 0 {
-			startPrint = false
-		}
-
-		if equal := strings.Index(line, "filter {"); equal >= 0 {
-			startPrint = true
-		}
-
-		if equal := strings.Index(line, "output {"); equal >= 0 {
-			startPrint = false
-		}
-
-		if startPrint {
-			if viper.GetBool("config.log.debug") {
-				fmt.Println(i, line)
-			}
-
-			dw.WriteString(line + "\n")
-		}
 	}
 
 	dw.Flush()

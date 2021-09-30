@@ -10,9 +10,9 @@ import (
 // InitConfig reads in config file and ENV variables if set.
 func InitConfig() {
 	// Search config in /etc, /opt, home directory, or current directory with name "config.yaml".
-	viper.AddConfigPath("/etc/logstash-pipelie-tester/")
-	viper.AddConfigPath("/opt/logstash-pipelie-tester/")
-	viper.AddConfigPath("~/.logstash-pipelie-tester/")
+	viper.AddConfigPath("/etc/logstash-pipeline-tester/")
+	viper.AddConfigPath("/opt/logstash-pipeline-tester/")
+	viper.AddConfigPath("~/.logstash-pipeline-tester/")
 	viper.AddConfigPath(".")
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("config")

@@ -12,6 +12,7 @@ tmp
 *.dll
 *.so
 *.dylib
+logstash-pipeline-tester
 
 # Test binary, built with `go test -c`
 *.test
