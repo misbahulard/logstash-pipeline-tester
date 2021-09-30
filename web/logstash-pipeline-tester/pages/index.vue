@@ -168,7 +168,9 @@
       },
       async submitPipeline(req) {
         this.loading = true
-        const data = await this.$axios.$post('http://localhost:8080/api/pipeline', qs.stringify(req), {
+        // you need to update this value, if you in deployment mode
+        let url = window.location.origin + "/api/pipeline"
+        const data = await this.$axios.$post(url, qs.stringify(req), {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded"
           }

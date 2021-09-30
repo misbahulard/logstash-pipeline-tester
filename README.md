@@ -36,6 +36,8 @@ air
 
 change your active directory to `web/logstash-pipeline-tester`, and run the `yarn` command.
 
+You may need to update the hardcoded hostname for calling the api in `web > logstash-pipeline-tester > pages > index.vue` or click [here](web/logstash-pipeline-tester/pages/index.vue).
+
 ```
 yarn dev
 ```
